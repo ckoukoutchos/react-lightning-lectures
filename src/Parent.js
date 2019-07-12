@@ -28,9 +28,14 @@ class Parent extends Component {
   }
 
   /*
-    Bound higher-order class method (using arrow function)
+    Bound higher-order class method (using arrow function) that uses a helper function
   */
-  boundClickHandlerWithParam = (argument) => () => {
+  boundClickHandlerWithParam = (argument) => this.helperFunc(argument);
+
+  /*
+    helper function
+  */
+  helperFunc = (argument) => {
     console.log('Passd argument', argument);
   }
 
@@ -38,14 +43,14 @@ class Parent extends Component {
     return (
       <div className='parent'>
         {/* UNbound */}
-        {/* <Child clicked={() => this.clickHandler}>
-          <h3>Child Render Count: {this.state.renderCount}</h3>
-        </Child> */}
-
-        {/* bound */}
-        <Child clicked={this.boundClickHandler}>
+        <Child clicked={() => this.clickHandler}>
           <h3>Child Render Count: {this.state.renderCount}</h3>
         </Child>
+
+        {/* bound */}
+        {/* <Child clicked={this.boundClickHandler}>
+          <h3>Child Render Count: {this.state.renderCount}</h3>
+        </Child> */}
 
         {/* bound w/ argument */}
         {/* <Child clicked={this.boundClickHandlerWithParam('Works!')}>
