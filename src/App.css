@@ -1,0 +1,30 @@
+button {
+  background: lightcoral;
+  border: none;
+  border-radius: 4px;
+  box-shadow: 2px 4px 4px#676767;
+  cursor: pointer;
+  height: 50px;
+  width: 200px;
+}
+
+.child {
+  align-items: center;
+  background: lightseagreen;
+  display: flex;
+  flex-direction: column;
+  height: 200px;
+  justify-content: center;
+  width: 250px;
+}
+
+.parent {
+  align-items: center;
+  background: lightblue;
+  display: flex;
+  flex-direction: column;
+  height: 350px;
+  justify-content: center;
+  margin: auto;
+  width: 400px;
+}
