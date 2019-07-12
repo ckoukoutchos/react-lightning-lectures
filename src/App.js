@@ -26,17 +26,3 @@ class App extends Component {
 }
 
 export default App;
-
-/*
-  Anonymous functions inside render call:
-
-  render() {
-    // these two are equivalent
-    <SomeComponent clicked={this.clickHandler.bind(this)}></SomeComponent>
-    <SomeComponent clicked={() => this.clickHandler}></SomeComponent>
-
-    // for passing a arguement
-    <SomeComponent clicked={() => this.clickHandler(someArgument)}></SomeComponent>
-  }
-
-*/
