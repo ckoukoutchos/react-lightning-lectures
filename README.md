@@ -3,7 +3,7 @@
 A series of short (5-15 minute) lessons on React and JS topics.
 These are intended to provide a deeper dive into some of the nuts and bots, high-level concepts, and best practices of React.
 
-Each topic has its own branch. They include a notes file explaining the topic and a simple demo app showing the concept.
+Each topic is contained in its own branch. They include a notes file explaining the topic and a simple demo app showing the concept.
 Though they are designed as lectures, the notes, along with exploring the demo, should be sufficient to explain the topic.
 
 ### Demo Set-up
@@ -14,7 +14,7 @@ This project was set-up using `create-react-app`. To run it follow these steps:
 
 2. Clone the project down
 
-3. Using terminal, navigate to the project folder and then run `npm install`
+3. In a terminal window, navigate to the project folder and then run `npm install`
 
 4. Once the packages have been installed, run `npm run start`
 
