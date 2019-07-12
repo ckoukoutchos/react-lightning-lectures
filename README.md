@@ -26,4 +26,12 @@ This project was set-up using `create-react-app`. To run it follow these steps:
 
 ### Best Practices
 
-Anonymous functions inside component `render()` methods (anonymous-render-funcs)
+Anonymous functions inside component `render()` methods (branch: anonymous-render-funcs)
+
+---
+
+Have an idea for a lecture? Feel free to raise an issue with suggestions.
+
+Noticed a typo or want to call BS on a code section? Make a pull request with edits.
+
+Interested in contributing? Feel free to reach out, the more the merrier!
