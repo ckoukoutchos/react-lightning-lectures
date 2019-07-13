@@ -82,7 +82,7 @@ console.log(mySportsCar.honk()); // prints 'Beep beep!'
 console.log(mySportsCar.convertible); // prints true
 ```
 
-Under the hood, `class` uses the same prototypical model as before, it's now just in a tidier form. This is know as [syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugar).
+Under the hood, `class` uses the same prototypical model as before, it's now just in a tidier form. This is known as [syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugar).
 Here is what Babel transforms `class` to for older non-ES6 compliant browsers. Look familiar?
 
 ```javascript
@@ -105,7 +105,7 @@ In React, we use `class` to create components which use state and/or lifecycle m
 a button has been clicked.
 
 ```javascript
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 
 class MyComponent extends Component {
   // constructor function
@@ -116,10 +116,10 @@ class MyComponent extends Component {
     // initialize component state
     this.state = {
       counter: 0
-    }
+    };
 
     // bind handler to this component object
-    this.clickHandler.bind(this);
+    this.clickHandler = this.clickHandler.bind(this);
   }
 
   // on button click, increase counter number
@@ -128,10 +128,12 @@ class MyComponent extends Component {
   }
 
   render() {
-    <>
-      <h1># of Clicks: {this.state.counter}<h1>
-      <button onClick={this.clickHandler}>Click Me!<button>
-    </>
+    return (
+      <>
+        <h1># of Clicks: {this.state.counter}</h1>
+        <button onClick={this.clickHandler}>Click Me!</button>
+      </>
+    );
   }
 }
 ```
@@ -148,24 +150,26 @@ However, these steps might be unecessary if you are using a more recent version 
 Here is a shorter, cleaner way to right the same component as above.
 
 ```javascript
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 
 class MyComponent extends Component {
   // initialize component state
-  this.state = {
+  state = {
     counter: 0
-  }
+  };
 
   // on button click, increase counter number
   clickHandler = () => {
     this.setState(prevState => ({ counter: prevState.counter + 1 }));
-  }
+  };
 
   render() {
-    <>
-      <h1># of Clicks: {this.state.counter}<h1>
-      <button onClick={this.clickHandler}>Click Me!<button>
-    </>
+    return (
+      <>
+        <h1># of Clicks: {this.state.counter}</h1>
+        <button onClick={this.clickHandler}>Click Me!</button>
+      </>
+    );
   }
 }
 ```
@@ -183,10 +187,13 @@ constructor(...args) {
 }
 ```
 
-We have also done away with binding handlers because we used an ES6 arrow function, which uses the correct `this` context of the class instance we are creating.
+We have also done away with binding handlers in the constructor by using an ES6 arrow function, which uses the correct `this` context of the class instance we are creating.
+You can see and play around with code examples in the demo app. Notice that both versions work perfectly fine.
 
 ### Do I Ever Need to Call the Constructor?
 
-For almost all components, assuming you have the Babel plugin, no. One could argue that, for components that have complicated initialization logic, it is clearer
+For almost all components, assuming you have the Babel plugin, no.
+
+One could argue that, for components that have complicated initialization logic, it is clearer
 to wrap the code inside a constructor function rather than just letting Babel do it behind the scenes. If you come from the Angular world, you maybe tempted
 to ask what about Dependency Injection (DI). However, in React, no DI is needed to write reusable code.

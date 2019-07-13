@@ -1,10 +1,13 @@
 import React from 'react';
 import './App.css';
+import Constructor from './Constructor';
+import NoConstructor from './NoConstructor';
 
 function App() {
   return (
-    <div>
-      Default Project
+    <div className='App'>
+      <Constructor />
+      <NoConstructor />
     </div>
   );
 }

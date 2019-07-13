@@ -1,0 +1,26 @@
+.App {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.Box {
+  align-items: center;
+  background: lightblue;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 300px;
+  text-align: center;
+  width: 400px;
+}
+
+button {
+  background: lightcoral;
+  border: none;
+  border-radius: 4px;
+  box-shadow: 2px 4px 4px#676767;
+  cursor: pointer;
+  height: 50px;
+  width: 150px;
+}
