@@ -26,7 +26,11 @@ This project was set-up using `create-react-app`. To run it follow these steps:
 
 ### Best Practices
 
-Anonymous functions inside component `render()` methods (branch: anonymous-render-funcs)
+**anonymous-render-funcs**
+Why you should not use anonymous functions inside a component's `render()` method
+
+**constructor-funcs**
+Why you usually do not need to use a constructor function inside a class component
 
 ---
 
