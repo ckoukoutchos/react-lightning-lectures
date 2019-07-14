@@ -5,20 +5,26 @@
 Back in the old ES5 days of JavaScript, you created an instance of an object by using the `new` keyword before any function:
 
 ```javascript
-// constructor func
-function CreateCar(color) {
+/*
+  Constructor function which defines the object type, Car,
+  and any methods or properties it should have
+*/
+function Car(color) {
+  // object property
   this.color = color;
+
+  // object method
+  this.honk = function() {
+    console.log('Beep beep!');
+  };
 }
 
-// add 'honk' method to object prototype
-CreateCar.prototype.honk = function() {
-  console.log('Beep beep!');
-};
+/*
+  Creates a new object of type Car using the Car constructor function as a blue print
+*/
+var myCar = new Car('blue');
 
-// create new car object
-var myCar = new CreateCar('blue');
-
-console.log(myCar instanceof CreateCar); // prints true
+console.log(myCar instanceof Car); // prints true
 console.log(myCar.color); // prints 'blue'
 console.log(myCar.honk()); // prints 'Beep beep!'
 ```
@@ -26,24 +32,28 @@ console.log(myCar.honk()); // prints 'Beep beep!'
 This process allows for user defined object types which can be extended, much like classes in other languages (Java, C#). Here is a SportsCar object that extends the Car object.
 
 ```javascript
-// constructor func
-function CreateSportsCar() {
+// Constructor function
+function SportsCar() {
   this.convertible = true;
 }
 
-// invoke constructor of 'parent'
-CreateSportsCar.prototype = new CreateCar('red');
+/*
+  Adds Car to SportsCar's inheritance chain, so when a SportsCar object is created
+  it will call the Car constructor function, which adds all the Car methods and properties to a new SportsCar object
+*/
+SportsCar.prototype = new Car('red');
 
-// create new car object
-var mySportsCar = new CreateSportsCar();
+// Creates new SportsCar object
+var mySportsCar = new SportsCar();
 
-console.log(mySportsCar instanceof CreateSportsCar); // prints true
+console.log(mySportsCar instanceof SportsCar); // prints true
+console.log(mySportsCar instanceof Car); // prints true since SportsCar inherits from Car
 console.log(mySportsCar.color); // prints 'red'
 console.log(mySportsCar.honk()); // prints 'Beep beep!'
 console.log(mySportsCar.convertible); // prints true
 ```
 
-However, many found the way JavaScript does 'classes' and inheritance via the prototypical model above too strange -especially for those coming from those traditional, object oriented languages.
+However, many found the way JavaScript does 'classes' and inheritance via the prototypical model above too strange -especially for those coming from object oriented languages.
 So ES6 came along and introduced the JavaScript 'class'. Here is the same code as above in the new format.
 
 ```javaScript
@@ -58,7 +68,7 @@ class Car {
   }
 }
 
-// create new instance of Car
+// Create new instance of Car
 const myCar = new Car('blue');
 
 console.log(myCar instanceof Car) // prints true
@@ -68,7 +78,7 @@ console.log(myCar.honk()); // prints 'Beep beep!'
 // SportsCar class definition
 class SportsCar extends Car {
   constructor(color) {
-    // calls constructor of parent Car class
+    // Calls constructor of parent Car class
     super(color)
     this.convertible = true;
   }
@@ -77,12 +87,13 @@ class SportsCar extends Car {
 const mySportsCar = new SportsCar('red');
 
 console.log(mySportsCar instanceof SportsCar); // prints true
+console.log(mySportsCar instanceof Car); // prints true
 console.log(mySportsCar.color); // prints 'red'
 console.log(mySportsCar.honk()); // prints 'Beep beep!'
 console.log(mySportsCar.convertible); // prints true
 ```
 
-Under the hood, `class` uses the same prototypical model as before, it's now just in a tidier form. This is known as [syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugar).
+Under the hood, `class` uses the same prototypical model as before, it's just in a tidier form. This is known as [syntactic sugar](https://en.wikipedia.org/wiki/Syntactic_sugar).
 Here is what Babel transforms `class` to for older non-ES6 compliant browsers. Look familiar?
 
 ```javascript
@@ -118,7 +129,7 @@ class MyComponent extends Component {
       counter: 0
     };
 
-    // bind handler to this component object
+    // bind handler to this component instance
     this.clickHandler = this.clickHandler.bind(this);
   }
 
@@ -174,15 +185,17 @@ class MyComponent extends Component {
 }
 ```
 
-When Babel transpiles this code, it will add a `constructor` for you and call `super(props)`, something like this:
+When Babel transpiles this code before running it in the browser, it will add a `constructor` for you and call `super(props)`, something like this:
 
 ```javascript
-// uses spread operator to pass all props
+// uses spread operator to pass all props to constructor function
 constructor(...args) {
-  // temporary store variable
+  // temporary variable
   var _temp;
 
-  // calls parents constructor function with props and initializes component state
+  /*
+    Calls parent's constructor function with props and initializes component with any properties or methods of the component, in this case, 'state'
+  */
   return (_temp = super(...args)), (this.state = { counter: 0 }), _temp;
 }
 ```
@@ -194,6 +207,8 @@ You can see and play around with code examples in the demo app. Notice that both
 
 For almost all components, assuming you have the Babel plugin, no.
 
-One could argue that, for components that have complicated initialization logic, it is clearer
-to wrap the code inside a constructor function rather than just letting Babel do it behind the scenes. If you come from the Angular world, you maybe tempted
-to ask what about Dependency Injection (DI). However, in React, no DI is needed to write reusable code.
+One could argue that, for components that have complicated initialization logic, it is cleaner/clearer
+to wrap the code inside a constructor function rather than just letting Babel do it behind the scenes.
+
+Note: If you come from the Angular world, you maybe tempted
+to ask what about Dependency Injection (DI). It's not a thing in React, don't worry about it.
