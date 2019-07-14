@@ -24,7 +24,7 @@ function* fetchUsers() {
     const users = yield response.json();
 
     // dipatches FETCH_USERS_SUCCESS action
-    put(fetchUsersSuccess(users));
+    yield put(fetchUsersSuccess(users));
 
     // if API call or converting json object fails
   } catch (error) {

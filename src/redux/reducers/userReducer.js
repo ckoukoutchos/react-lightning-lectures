@@ -16,7 +16,6 @@ export default function (state = initialState, action) {
 
   // switch based on actionTypes
   switch (action.type) {
-
     // when call is made to fetch users
     case FETCH_USERS: {
       return {
@@ -27,6 +26,7 @@ export default function (state = initialState, action) {
 
     // when call to fetch user is successful
     case FETCH_USERS_SUCCESS: {
+      console.log('action', action);
       return {
         ...state,
         loading: false,

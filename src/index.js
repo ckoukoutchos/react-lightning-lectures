@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'redux-redux';
+import { Provider } from 'react-redux';
 import configureStore from './redux/store';
 import rootSaga from './redux/sagas/rootSaga';
 import './index.css';
