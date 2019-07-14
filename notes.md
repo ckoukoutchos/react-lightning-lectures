@@ -6,25 +6,25 @@ First, inside the `<Parent>` render method we create an anonymous callback funct
 which is passed down to the `<Child>` as the 'clicked' prop.
 
 ```javascript
-class Parent {
-    clickHandler() {
-        // does stuff on click
-    }
+class Parent extends Component {
+  clickHandler() {
+    // does stuff on click
+  }
 
-    render() {
-        return (
-            <Child clicked={() => this.clickHandler} />
-            // functionally equivalent to using bind method below
-            <Child clicked={this.clickHandler.bind(this)} />
-        );
-    }
+  render() {
+    return (
+      <Child clicked={() => this.clickHandler} />
+      // functionally equivalent to using bind method below
+      <Child clicked={this.clickHandler.bind(this)} />
+    );
+  }
 }
 ```
 
 The `<Child>` recieves a new prop, 'clicked', and this triggers its render method, creating a `<button>` with the handler.
 
 ```javascript
-class Child {
+class Child extends Component {
   render() {
     return <button onClick={this.props.clicked} />;
   }
@@ -32,22 +32,22 @@ class Child {
 ```
 
 When the `<Parent>` is re-rendered (in the demo, this is done with a `setInterval` trigger every 5 seconds),
-the `<Child>` is again passed the `clickHandler`. However, because we are using an anonymous callback to wrap the `clickHandler`,
-a new anonymous function is created.
+the `<Child>` is again passed the 'clicked' prop and, because we are using an anonymous callback to wrap the `clickHandler`,
+a new anonymous function is created inside `clicked={() => this.clickHandler}`.
 
 The `<Child>` will then check to see if the new 'clicked' prop it was passed is different than the current 'clicked' prop.
 Since a new anonymous function was used (and therefore has a different reference in memory than the previous one),
-it will cause the `<Child>` to re-render, despite the underlying `clickHandler` method being exactly the same.
+it will cause the `<Child>` to re-render, despite the underlying `clickHandler` method being exactly the same as before.
 
 This is why in the demo app both the Child and Parent render count increases each cycle.
 
 ### What's The Cost?
 
-Rendering is costly: it takes time and computational resources to re-render a component and during a re-render the user may not see or be able to interact with certain elements,
-which makes for bad UX. If the component sits near the top of the component tree, it could cause the re-render of a sizeable portion of the page.
+Rendering is costly: it takes time and computational resources to re-render a component and during a re-render the user may not be able to see or interact with certain elements,
+which makes for a poor user experience (UX). If the component sits near the top of the component tree, it could cause the re-render of a sizeable portion of the page.
 
-Mermory bloat: since each render creates a new anonymous function, the JS engine must create and store in memory a new object every render.
-If a page included a dozen `<input>` fields, each with an anonymous function to handle input changes, it could end up creating a dozen new objects with each keystroke in an input.
+Memory bloat: since each render creates a new anonymous function, the JS engine will create and store in memory a new object with each render.
+If a page included a dozen `<input>` fields, each with an anonymous function to handle changes, it could end up creating a dozen new objects with each keystroke in an input.
 
 ### Solution
 
@@ -59,7 +59,7 @@ clickHandler = () => {
 };
 ```
 
-This function will have the correct context (this) passed in at runtime, not cause re-rendering/object bloat, and makes for cleaner code:
+This function will have the correct context (this) passed in at runtime and will not cause re-rendering/object bloat. It also makes for cleaner code:
 
 ```javascript
 <Child clicked={this.clickHandler}>
