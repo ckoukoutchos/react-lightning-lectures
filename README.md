@@ -8,6 +8,12 @@ Though they are designed as lectures, the notes, along with exploring the demo, 
 
 ## Topics
 
+### Concepts
+
+**redux-overview**
+
+Overview of a simple redux/saga application
+
 ### Best Practices
 
 **anonymous-render-funcs**
@@ -18,7 +24,9 @@ Why you should not use anonymous functions inside a component's `render()` metho
 
 Why you usually do not need to use a constructor function inside a class component
 
-### Demo Set-up
+---
+
+### Set-up for Demo Applications
 
 This project was set-up using `create-react-app`. To run it follow these steps:
 
