@@ -1,31 +1,46 @@
 # Concepts: Overview of Redux & Sagas with React
 
-## 10,000 Foot View
+This guide is meant as an introduction to the concepts of Redux (with Sagas). We'll start with the big picture and slowly work our
+way down to actual code in a boiler plate project that fetches and displays a list of users.
 
-From way up high, we have React components that render data that has been fetched with Sagas and stored in a Redux store.
+## 10,000 Feet View
+
+From way up high, we have React components that render data that has been fetched with Sagas and stored in a Redux store (see diagram below).
 When data changes on the backend or when a user interacts with the UI, the data rendered with React must change. To keep data changes in-sync
-across the application, we use a sigle source of truth, Redux. It acts as a data store, a snapshot, of the application state at a point in time.
+across the application, we use a sigle source of truth, Redux. It acts as a data store, a snapshot of the application state at a point in time.
 
 Components subscribe to portions of the store, allowing them to listen in on changes to the data they care about. When a user changes data
-(ex. updating an email address), the component will send a message to the store to inform it of the change. The message will then pass through the Saga
-middleware. If it requires an asynchronous event (side-effect) like making an HTTP call, a Saga will run and when it resolves pass the another message along
-to the store.
+(ex. updating an email address), the component will send a message to the store to inform it of the change. The message will first pass through the Saga
+middleware. If it requires an asynchronous event (side-effect) like making an HTTP call, a Saga will run and when it resolves pass a different message along
+to the store, otherwise the original message just passes through.
 
 Based on the type of message being passed, the Redux store will accordingly update the application state. These data changes will then be pushed out to
-all components interested in the updated portion of the store. React will render the new state and the cycle is complete.
+all components interested in the updated portion of the store. React will render components with the new state and the cycle is complete.
 
+**10,000ft Diagram**
 ![alt text](./diagrams/10000feet.png)
 
-## 1000 Foot View
+## 1,000 Feet View
 
+Below the clouds, we can begin to make out the flutter of messages passing from components. When a component's data changes, it uses Redux's `dispatch` method to pass a plain JavaScript object (bottom left of diagram).
+The object may contain two things: the 'type' of message (action) and maybe a payload (e.g. an updated email address).
+
+The action will pass into the middleware (bottom right of diagram). The middleware is listening for particular types of actions: ones that require some asynchronous code to run. When the middleware finds one, it passes the message to
+the relevant Saga, a [generator function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*), which exectues the async code (ex. makes a fetch request), pauses until it resolves (gets a response from a server), and then finishes running the code (parsing or transformations). Then, it will create and pass along another action to the store. If the original action was not being listened for by the middleware, it simply passes through unaltered.
+
+Once the action reaches the store, a `reducer` is listening for certain types of actions (top right of diagram). The action type will determine how the reducer updates the state held in the store. It does so immutably and with pure functions: by returning a new state object when an update occurs, instead of mutating the current data, and with functions that do not have any side-effects (async code). These changes are then pushed out (published) to any component that is listening (subscribed) to the data in the store.
+
+Similar to React's [Context API](https://reactjs.org/docs/context.html), Redux has a `<Provider>` component that wraps your `<App>` and allows it to inject data at any layer of the component tree (left side of diagram). A component listens to a portion of the store by wrapping itself in Redux's `connect` method: a higher-order component that will pass the store data down to your component as regular old `props` (defined in your component as `mapStateToProps`). When the store data changes, the updated props will trigger the component to re-render with the new state. The connect component will also pass `dispatch` methods for the component to fire off actions (defined in your component as `mapDispatchToProps`).
+
+**1,000ft Diagram**
 ![alt text](./diagrams/1000feet.png)
 
 ### Folder Structure
 
 I will preface this with a disclaimer: there is not a "correct" folder structure for a React/Redux project. It is highly dependant on the size and nature of your application.
-What follows are recommendations, not gospel,to be used as guides.
+What follows are recommendations, not gospel, to be used as guides.
 
-**Small**
+**Small Project**
 
 ```
 src
@@ -37,7 +52,7 @@ src
 ......store.js // create store and middleware
 ```
 
-**Medium**
+**Medium Project**
 
 ```
 src
@@ -55,7 +70,7 @@ src
 ......store.js // create store and middleware
 ```
 
-**Large**
+**Large Project**
 
 ```
 src
