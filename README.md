@@ -18,6 +18,7 @@ Based on the type of message being passed, the Redux store will accordingly upda
 all components interested in the updated portion of the store. React will render components with the new state and the cycle is complete.
 
 **10,000ft Diagram**
+
 ![alt text](./diagrams/10000feet.png)
 
 ## 1,000 Feet View
@@ -30,12 +31,61 @@ the relevant Saga, a [generator function](https://developer.mozilla.org/en-US/do
 
 Once the action reaches the store, a `reducer` is listening for certain types of actions (top right of diagram). The action type will determine how the reducer updates the state held in the store. It does so immutably and with pure functions: by returning a new state object when an update occurs, instead of mutating the current data, and with functions that do not have any side-effects (async code). These changes are then pushed out (published) to any component that is listening (subscribed) to the data in the store.
 
-Similar to React's [Context API](https://reactjs.org/docs/context.html), Redux has a `<Provider>` component that wraps your `<App>` and allows it to inject data at any layer of the component tree (left side of diagram). A component listens to a portion of the store by wrapping itself in Redux's `connect` method: a higher-order component that will pass the store data down to your component as regular old `props` (defined in your component as `mapStateToProps`). When the store data changes, the updated props will trigger the component to re-render with the new state. The connect component will also pass `dispatch` methods for the component to fire off actions (defined in your component as `mapDispatchToProps`).
+Similar to React's [Context API](https://reactjs.org/docs/context.html), Redux has a `<Provider>` component that wraps your `<App>` and allows it to inject data at any layer of the component tree (left side of diagram). A component listens to a portion of the store by wrapping itself in Redux's `connect` method: a higher-order component (HOC) that will pass the store data down to your component as regular old `props` (defined in your component as `mapStateToProps`). When the store data changes, the updated props will trigger the component to re-render with the new state. The connect component will also pass `dispatch` methods for the component to fire off actions (defined in your component as `mapDispatchToProps`). When the UI state changes, a new action can be dispatched and the cycle begins again.
 
 **1,000ft Diagram**
+
 ![alt text](./diagrams/1000feet.png)
 
-### Folder Structure
+## Sea Level View
+
+Let's walk through step-by-step how a data change cycle works, starting with the `<UserList>` component. When the component mounts after being initialized, it runs the `componentDidMount` lifecycle method:
+
+```javascript
+UserList.js;
+
+componentDidMount() {
+  this.props.getUsers();
+}
+```
+
+The `getUsers()` function is a prop passed by Redux's `connect` HOC to our component. We can define what `dispatch` methods we want passed inside `mapDispatchToProps` and pass it as an argument to `connect`.
+
+```javascript
+UserList.js;
+
+const mapDispatchToProps = dispatch => ({
+  getUsers: () => dispatch(fetchUsers())
+});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(UserList);
+```
+
+`getUsers` will fire an action to the Redux store to signal an update in state. Here, you could define and pass a plain JS object (message) to `dispatch`, but we are using an action creator: a function that returns an action. This allows us to keep our code DRY (Don't Repeat Yourself) by referencing a single function rather than continually typing out the same object each time.
+
+```javascript
+actions.js;
+
+export const fetchUsers = () => ({
+  type: FETCH_USERS
+});
+```
+
+Actions must include at least a `type`, a string to identify it. We could define the type here but we are using a constant `FETCH_USERS` imported from a constants file. This allows us to avoid typo bugs and easy reference/look up of action types since they exist in a single place.
+
+```javascript
+actionsTypes.js;
+
+export const FETCH_USERS = 'FETCH_USERS';
+```
+
+```javascript
+```
+
+## Folder Structure
 
 I will preface this with a disclaimer: there is not a "correct" folder structure for a React/Redux project. It is highly dependant on the size and nature of your application.
 What follows are recommendations, not gospel, to be used as guides.
