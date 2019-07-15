@@ -1,29 +1,88 @@
-# React Lightning Lectures
+# Best Practices: Anonymous Functions Inside React Render Methods
 
-A series of short (5-15 minute) lessons on React and JS topics.
-These are intended to provide a deeper dive into some of the nuts and bots, high-level concepts, and best practices of React.
+Lets walk through the steps of displaying a `<Parent>` component that passes a click handler to a `<button>` in a `<Child>` component.
 
-Each topic is contained in its own branch. They include a notes file explaining the topic and a simple demo app showing the concept.
-Though they are designed as lectures, the notes, along with exploring the demo, should be sufficient to explain the topic.
+First, inside the `<Parent>` render method we create an anonymous callback function. This function returns a reference to the `clickHandler` class method,
+which is passed down to the `<Child>` as the 'clicked' prop.
 
-### Demo Set-up
+```javascript
+class Parent extends Component {
+  clickHandler() {
+    // does stuff on click
+  }
 
-This project was set-up using `create-react-app`. To run it follow these steps:
+  render() {
+    return (
+      <Child clicked={() => this.clickHandler} />
+      // functionally equivalent to using bind method below
+      <Child clicked={this.clickHandler.bind(this)} />
+    );
+  }
+}
+```
 
-1. Make sure you have [Node.js](https://nodejs.org/en/) installed on your machine.
+The `<Child>` recieves a new prop, 'clicked', and this triggers its render method, creating a `<button>` with the handler.
 
-2. Clone the project down
+```javascript
+class Child extends Component {
+  render() {
+    return <button onClick={this.props.clicked} />;
+  }
+}
+```
 
-3. In a terminal window, navigate to the project folder and then run `npm install`
+When the `<Parent>` is re-rendered (in the demo, this is done with a `setInterval` trigger every 5 seconds),
+the `<Child>` is again passed the 'clicked' prop and, because we are using an anonymous callback to wrap the `clickHandler`,
+a new anonymous function is created inside `clicked={() => this.clickHandler}`.
 
-4. Once the packages have been installed, run `npm run start`
+The `<Child>` will then check to see if the new 'clicked' prop it was passed is different than the current 'clicked' prop.
+Since a new anonymous function was used (and therefore has a different reference in memory than the previous one),
+it will cause the `<Child>` to re-render, despite the underlying `clickHandler` method being exactly the same as before.
 
-5. The project will be running at `http://localhost:3000`
+This is why in the demo app both the Child and Parent render count increases each cycle.
 
-6. To see a particular topic, run `git checkout <insert_topic_branch_name>` in your terminal
+### What's The Cost?
 
-## Topics
+Rendering is costly: it takes time and computational resources to re-render a component and during a re-render the user may not be able to see or interact with certain elements,
+which makes for a poor user experience (UX). If the component sits near the top of the component tree, it could cause the re-render of a sizeable portion of the page.
 
-### Best Practices
+Memory bloat: since each render creates a new anonymous function, the JS engine will create and store in memory a new object with each render.
+If a page included a dozen `<input>` fields, each with an anonymous function to handle changes, it could end up creating a dozen new objects with each keystroke in an input.
 
-Anonymous functions inside component `render()` methods (anonymous-render-funcs)
+### Solution
+
+To avoid unnecessary renders and object creation, use an arrow function bound to the component:
+
+```javascript
+clickHandler = () => {
+  // does stuff on click
+};
+```
+
+This function will have the correct context (this) passed in at runtime and will not cause re-rendering/object bloat. It also makes for cleaner code:
+
+```javascript
+<Child clicked={this.clickHandler}>
+
+// compared to
+<Child clicked={() => this.clickHandler} />
+```
+
+You can see this for yourself by commenting out lines 46-48 and uncommenting lines 51-53 in the Parent.js file.
+Notice that now only the `<Parent>` re-renders every 5 seconds and not the `<Child>`, because the same reference is being passed rather than a new function.
+
+If you need to pass an argument to the callback, you can use a higher-order function and a helper function:
+
+```javascript
+boundClickHandlerWithParam = argument => this.helperFunc(argument);
+
+helperFunc = argument => {
+  // does stuff with arguement on click
+};
+
+...
+
+<Child clicked={this.boundClickHandlerWithParam(someValue)}>
+```
+
+You can see this for yourself by uncommenting lines 55-57 in Parent.js
