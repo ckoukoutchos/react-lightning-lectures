@@ -49,7 +49,7 @@ componentDidMount() {
 }
 ```
 
-The `getUsers()` function is a prop passed by Redux's `connect` HOC to our component. We can define what `dispatch` methods we want passed inside `mapDispatchToProps` and pass it as an argument to `connect`.
+`getUsers()` is a prop passed by Redux's `connect` HOC to our component. It is just a wrapper for Redux's `dispatch` method which handles passing the store messages (actions). We can define what `dispatch` methods we want passed inside `mapDispatchToProps` and pass it as an argument to `connect`.
 
 ```javascript
 UserList.js;
@@ -64,7 +64,7 @@ export default connect(
 )(UserList);
 ```
 
-`getUsers` will fire an action to the Redux store to signal an update in state. Here, you could define and pass a plain JS object (message) to `dispatch`, but we are using an action creator: a function that returns an action. This allows us to keep our code DRY (Don't Repeat Yourself) by referencing a single function rather than continually typing out the same object each time.
+`getUsers` will fire an action to the Redux store to signal an update in state. Here, you could define and pass a plain JS object to `dispatch`, but we are using an action creator: a function that returns an action. This allows us to keep our code DRY (Don't Repeat Yourself) by referencing a single function rather than continually typing out the same object each time.
 
 ```javascript
 actions.js;
@@ -74,7 +74,7 @@ export const fetchUsers = () => ({
 });
 ```
 
-Actions must include at least a `type`, a string to identify it. We could define the type here but we are using a constant `FETCH_USERS` imported from a constants file. This allows us to avoid typo bugs and easy reference/look up of action types since they exist in a single place.
+Actions must include at least a `type` property, a string to identify it. We could define the type here but we are using a constant `FETCH_USERS` imported from a constants file. This allows us to avoid typo bugs and easy reference/look up of action types since they exist in a single place.
 
 ```javascript
 actionsTypes.js;
@@ -82,8 +82,174 @@ actionsTypes.js;
 export const FETCH_USERS = 'FETCH_USERS';
 ```
 
+Since we have Redux set up to use sagas, our action will pass through our middleware before reaching the store. We have a 'watchUser' saga that listens for (`takesEvery`) `FETCH_USERS` action type:
+
 ```javascript
+userSaga.js;
+
+export default function* watchUser() {
+  yield all([takeEvery(FETCH_USERS, fetchUsers)]);
+}
 ```
+
+It will then trigger the `fetchUsers` function which tries to get the list of users from our API. Notice the saga makes use of a generator function (`function*`), which allows our async code to execute, pause (`yield`) while we wait for a response, and then continue. This has the benefit of not blocking other code from running during this time like a separate thread just for side effects.
+
+```javascript
+userSaga.js;
+
+function* fetchUsers() {
+  // tries to fetch users
+  try {
+    // calls API for users list
+    const response = yield fetch('https://jsonplaceholder.typicode.com/users');
+
+    // converts json to JS object
+    const users = yield response.json();
+
+    // dipatches FETCH_USERS_SUCCESS action
+    yield put(fetchUsersSuccess(users));
+
+    // if API call or converting json object fails
+  } catch (error) {
+    console.log('Oops, something went wrong!');
+  }
+}
+```
+
+While our fetch request is being handled somewhere on some backend, the `FETCH_USERS` action has passed through the middleware and reached our reducer. The reducer function takes in two arguments: the current state of the store (or initial state when the application first loads) and an incoming action. Based on the action type, the reducer will immutably update and return a new application state. For `FETCH_USERS`, our reducer will return a new state object with the `loading` property set to `true`.
+
+```javascript
+userReducer.js;
+
+export default function(state = initialState, action) {
+  // switch based on actionTypes
+  switch (action.type) {
+    // when call is made to fetch users
+    case FETCH_USERS: {
+      return {
+        // spread the previous state properties, then overwrite with any updates
+        ...state,
+        loading: true
+      };
+    }
+    /* other code we'll come back to here */
+
+    // if type doesn't match any case, return previous state
+    default:
+      return state;
+  }
+}
+```
+
+Updating the store will trigger Redux to push out the new state to any components listening (subscribed) to the store. These updates propagated through Redux's `<Provider>` to `<Connect>` which in turn pass the updates as props to your components that are wrapped with a `connect` HOC. We can define which portions of the application state we are interested in with `mapStateToProps` and pass it as an arguement to `connect`.
+
+```javascript
+UserList.js;
+
+const mapStateToProps = state => ({
+  loading: state.users.loading,
+  users: state.users.users
+});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(UserList);
+```
+
+We can then access these props just like we would if passed from any other parent component. In `<UserList>`, we are listening for the `loading` property of the store to determine if we should show a <Spinner> or not. When loading is updated to true, it will cause new props to be passed and the component to re-render showing a spinner.
+
+```javascript
+UserList.js;
+
+render() {
+    const { loading, users } = this.props;
+
+    // creates a user card for each item in users
+    const userList = users.map(user => (
+      <User email={user.email} key={user.id} name={user.name} />
+    ));
+
+    // displays spinner if loading, user cards otherwise
+    return loading ? <Spinner /> : userList;
+  }
+```
+
+Let's check back in on our fetch call in the user saga. Assuming users are successful returned, we then dispatch (`put`) a new action, `fetchUsersSuccess(users)`.
+
+```javascript
+userSaga.js;
+
+function* fetchUsers() {
+  try {
+    /* API call here */
+
+    // dipatches FETCH_USERS_SUCCESS action
+    yield put(fetchUsersSuccess(users));
+
+  /* error block here */
+}
+```
+
+`fetchUsersSuccess(users)` is another action creator that takes an argument, the users list returned by the fetch request, and returns a `FETCH_USERS_SUCCESS` type action.
+
+```javascript
+actions.js;
+
+export const fetchUsersSuccess = users => ({
+  type: FETCH_USERS_SUCCESS,
+  users
+});
+
+actionTypes.js;
+
+export const FETCH_USERS_SUCCESS = 'FETCH_USERS_SUCCESS';
+```
+
+The action will pass to the store and be handled in the `FETCH_USERS_SUCCESS` case: it updates the store with a new state, setting the loading property to false and adding an array of users.
+
+```javascript
+userReducer.js;
+
+export default function(state = initialState, action) {
+  // switch based on actionTypes
+  switch (action.type) {
+    /* FETCH_USERS case here */
+
+    // when call to fetch user is successful
+    case FETCH_USERS_SUCCESS: {
+      return {
+        ...state,
+        loading: false,
+        users: action.users
+      };
+    }
+    // if type doesn't match any case, return previous state
+    default:
+      return state;
+  }
+}
+```
+
+Again, Redux will push updates out to interested components. Our `<UserList>` will recieve new props for `loading` and `users` from the `connect` HOC and trigger a re-render of the component, displaying our users.
+
+```javascript
+UserList.js;
+
+render() {
+  const { loading, users } = this.props;
+
+  // creates a user card for each item in users
+  const userList = users.map(user => (
+    <User email={user.email} key={user.id} name={user.name} />
+  ));
+
+  // displays spinner if loading, user cards otherwise
+  return loading ? <Spinner /> : userList;
+}
+```
+
+Now the data change cycle is complete and our UI accurately reflects the state of our application.
 
 ## Folder Structure
 

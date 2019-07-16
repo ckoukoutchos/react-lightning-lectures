@@ -19,6 +19,7 @@ export default function (state = initialState, action) {
     // when call is made to fetch users
     case FETCH_USERS: {
       return {
+        // spread the previous state properties, then overwrite with any updates
         ...state,
         loading: true
       };
@@ -26,7 +27,6 @@ export default function (state = initialState, action) {
 
     // when call to fetch user is successful
     case FETCH_USERS_SUCCESS: {
-      console.log('action', action);
       return {
         ...state,
         loading: false,
