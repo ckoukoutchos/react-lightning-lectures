@@ -37,6 +37,8 @@ Similar to React's [Context API](https://reactjs.org/docs/context.html), Redux h
 
 ![alt text](./diagrams/1000feet.png)
 
+**Note:** I have the `connect` component under the React section. It is part of the Redux package but under the hood is just a React component, albeit a custom higher-order component.
+
 ## Sea Level View
 
 Let's walk through step-by-step how a data change cycle works, starting with the `<UserList>` component. When the component mounts after being initialized, it runs the `componentDidMount` lifecycle method:
@@ -49,7 +51,7 @@ componentDidMount() {
 }
 ```
 
-`getUsers()` is a prop passed by Redux's `connect` HOC to our component. It is just a wrapper for Redux's `dispatch` method which handles passing the store messages (actions). We can define what `dispatch` methods we want passed inside `mapDispatchToProps` and pass it as an argument to `connect`.
+`getUsers()` is a prop passed by Redux's `connect` HOC to our component. It is just a wrapper for Redux's `dispatch` method which handles passing to the store messages (actions). We can define what `dispatch` methods we want passed inside `mapDispatchToProps` and pass it as an argument to `connect`.
 
 ```javascript
 UserList.js;
@@ -64,7 +66,7 @@ export default connect(
 )(UserList);
 ```
 
-`getUsers` will fire an action to the Redux store to signal an update in state. Here, you could define and pass a plain JS object to `dispatch`, but we are using an action creator: a function that returns an action. This allows us to keep our code DRY (Don't Repeat Yourself) by referencing a single function rather than continually typing out the same object each time.
+`getUsers()` will fire an action to the Redux store to signal an update in state. Here, you could define and pass a plain JS object to `dispatch`, but we are using an action creator: a function that returns an action. This allows us to keep our code DRY (Don't Repeat Yourself) by referencing a single function rather than continually typing out the same object each time.
 
 ```javascript
 actions.js;
@@ -74,7 +76,7 @@ export const fetchUsers = () => ({
 });
 ```
 
-Actions must include at least a `type` property, a string to identify it. We could define the type here but we are using a constant `FETCH_USERS` imported from a constants file. This allows us to avoid typo bugs and easy reference/look up of action types since they exist in a single place.
+Actions must include at least a `type` property, a string to identify it. We could define the type here but we are using a constant `FETCH_USERS` imported from a constants file. This allows us to avoid typo bugs and easy reference/look up of action types since they will all exist in a single file.
 
 ```javascript
 actionsTypes.js;
@@ -82,7 +84,7 @@ actionsTypes.js;
 export const FETCH_USERS = 'FETCH_USERS';
 ```
 
-Since we have Redux set up to use sagas, our action will pass through our middleware before reaching the store. We have a 'watchUser' saga that listens for (`takesEvery`) `FETCH_USERS` action type:
+Since we have Redux set up to use sagas, our action will pass through our middleware before reaching the store. Think of middleware as software that runs between (in the middle of) other code, injecting some additional functionality or spinning off other processes based on the passing code (e.g. request/response handling of HTTP calls in an API). We have a 'watchUser' saga that listens for (`takesEvery`) `FETCH_USERS` action type:
 
 ```javascript
 userSaga.js;
@@ -106,8 +108,7 @@ function* fetchUsers() {
     // converts json to JS object
     const users = yield response.json();
 
-    // dipatches FETCH_USERS_SUCCESS action
-    yield put(fetchUsersSuccess(users));
+    /* other code we'll come back to here */
 
     // if API call or converting json object fails
   } catch (error) {
@@ -157,7 +158,7 @@ export default connect(
 )(UserList);
 ```
 
-We can then access these props just like we would if passed from any other parent component. In `<UserList>`, we are listening for the `loading` property of the store to determine if we should show a <Spinner> or not. When loading is updated to true, it will cause new props to be passed and the component to re-render showing a spinner.
+We can then access these props just like we would if passed from any other parent component. In `<UserList>`, we are listening for the `loading` property of the store to determine if we should show a spinner or not. When loading is updated to true, it will cause new props to be passed and the component to re-render showing a `<Spinner>`.
 
 ```javascript
 UserList.js;
