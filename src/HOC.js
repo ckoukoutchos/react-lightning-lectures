@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Spinner from './components/Spinner';
 
 // component function takes in a component, like a higher order function takes in a function
 const withApiCall = (WrappedComponent) => {
@@ -37,10 +38,11 @@ const withApiCall = (WrappedComponent) => {
 
     render() {
       /* 
-        return wrapped component with HOC's local user state injected as a props
-        make sure to pass parent props thru HOC down to the wrapped component
+        Return wrapped component with HOC's local user state injected as a prop.
+        Make sure to pass parent props thru HOC down to the wrapped component or
+        return Spinner if loading
       */
-      return <WrappedComponent loading={this.state.loading} users={this.state.users} {...this.props} />;
+      return this.state.loading ? <Spinner /> : <WrappedComponent users={this.state.users} {...this.props} />;
     }
   }
   // return component

@@ -1,49 +1,40 @@
-# React Lightning Lectures
+# Higher Order Components (HOCs)
 
-A series of short (5-15 minute) lessons on React and JS topics.
-These are intended to provide a deeper dive into some of the nuts and bots, high-level concepts, and best practices of React.
+If you find yourself re-writing the same functionality over and over again, that's usually a sign it's time to abstact out the common code into a re-usable chuck.
+Doing so will keep your code DRY (Don't Repeat Yourself), easier to maintain -since changes will only have to be made in one place rather than several, and help
+keep your code focused. A great way to achieve this in React is through Higher Order Components (HOCs). Before we dive in to creating a component, let's look at
+what the Higher Order half means first.
 
-Each topic is contained in its own branch. They include a notes file explaining the topic and a simple demo app showing the concept.
-Though they are designed as lectures, the notes, along with exploring the demo, should be sufficient to explain the topic.
+### Higher Order Functions
 
-## Topics
+A higher order function is a function that takes in and/or returns another function. A commonly used example would be any of the built-in array methods, e.g. filter or map.
+These methods expect as their first argument a function to call for each item in the array.
 
-### Concepts
+A classic CS example of a higher order function that both takes and returns a function is an adder.
 
-**redux-overview**
+```javascript
+// adder takes in two numbers and adds them
+function adder(x, y) {
+  return x + y;
+}
 
-Overview of a simple redux/saga application
+// makeAdder takes in a number and a function, adder
+function makeAdder(x, adder) {
+  // returns a new anonymous function that can take in a number, y
+  return function(y) {
+    /* 
+      the anonymous function returns the result of calling adder, which was the function
+      passed into makeAdder, on the number (x) that was passed to makeAdder and any
+      number that will be passed into the anonymous function (y)
+    */
+    return adder(x, y);
+  };
+}
 
-### Best Practices
+// create addTwo, a function that will add 2 to any number passed into it
+const addTwo = makeAdder(2, adder);
 
-**anonymous-render-funcs**
+addTwo(4); // returns 6
+```
 
-Why you should not use anonymous functions inside a component's `render()` method
-
-**constructor-funcs**
-
-Why you usually do not need to use a constructor function inside a class component
-
----
-
-### Set-up for Demo Applications
-
-This project was set-up using `create-react-app`. To run it follow these steps:
-
-1. Make sure you have [Node.js](https://nodejs.org/en/) installed on your machine.
-
-2. Clone the project down
-
-3. In a terminal window, navigate to the project folder and then run `npm install`
-
-4. Once the packages have been installed, run `git checkout <insert_topic_branch_name>` for the topic you are interested in
-
-5. Run `npm run start` and the project will be running at `http://localhost:3000`
-
----
-
-Have an idea for a lecture? Feel free to raise an issue with suggestions.
-
-Noticed a typo or want to call BS on a code section? Make a pull request with edits.
-
-Interested in contributing? Feel free to reach out, the more the merrier!
+### Higher Order Components
