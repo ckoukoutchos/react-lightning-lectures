@@ -3,7 +3,7 @@
 This guide is meant as an introduction to the concepts of Redux (with Sagas). We'll start with the big picture and slowly work our
 way down to actual code in a boiler plate project that fetches and displays a list of users.
 
-## 10,000 Feet View
+## 10,000 Foot View
 
 From way up high, we have React components that render data that has been fetched with Sagas and stored in a Redux store (see diagram below).
 When data changes on the backend or when a user interacts with the UI, the data rendered with React must change. To keep data changes in-sync
@@ -21,7 +21,7 @@ all components interested in the updated portion of the store. React will render
 
 ![alt text](./diagrams/10000feet.png)
 
-## 1,000 Feet View
+## 1,000 Foot View
 
 Below the clouds, we can begin to make out the flutter of messages passing from components. When a component's data changes, it uses Redux's `dispatch` method to pass a plain JavaScript object (bottom left of diagram).
 The object may contain two things: the 'type' of message (action) and maybe a payload (e.g. an updated email address).
